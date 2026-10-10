@@ -1,0 +1,47 @@
+{
+  "_comment": "Create two 'Function' tools in the Vapi dashboard (Tools tab). Set each tool's Server URL to https://YOUR-HOST/vapi/webhook and add header x-vapi-secret = your VAPI_SECRET.",
+  "tools": [
+    {
+      "type": "function",
+      "function": {
+        "name": "lookup_patient",
+        "description": "Check whether a patient already exists for a phone number. Call this immediately after the caller gives their phone number.",
+        "parameters": {
+          "type": "object",
+          "properties": { "phone_number": { "type": "string", "description": "10-digit US phone number" } },
+          "required": ["phone_number"]
+        }
+      }
+    },
+    {
+      "type": "function",
+      "function": {
+        "name": "save_patient",
+        "description": "Save the patient record. ONLY call after the caller has confirmed the read-back. Include patient_id only when updating an existing patient.",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "patient_id": { "type": "string", "description": "Only when updating an existing record" },
+            "first_name": { "type": "string" },
+            "last_name": { "type": "string" },
+            "date_of_birth": { "type": "string", "description": "MM/DD/YYYY" },
+            "sex": { "type": "string", "enum": ["Male", "Female", "Other", "Decline to Answer"] },
+            "phone_number": { "type": "string", "description": "10 digits" },
+            "email": { "type": "string" },
+            "address_line_1": { "type": "string" },
+            "address_line_2": { "type": "string" },
+            "city": { "type": "string" },
+            "state": { "type": "string", "description": "2-letter US state abbreviation, e.g. CA" },
+            "zip_code": { "type": "string", "description": "5 digits or ZIP+4" },
+            "insurance_provider": { "type": "string" },
+            "insurance_member_id": { "type": "string" },
+            "preferred_language": { "type": "string" },
+            "emergency_contact_name": { "type": "string" },
+            "emergency_contact_phone": { "type": "string" }
+          },
+          "required": ["first_name", "last_name", "date_of_birth", "sex", "phone_number", "address_line_1", "city", "state", "zip_code"]
+        }
+      }
+    }
+  ]
+}
