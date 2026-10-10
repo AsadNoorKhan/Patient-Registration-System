@@ -1,5 +1,4 @@
 {
-  "_comment": "Create two 'Function' tools in the Vapi dashboard (Tools tab). Set each tool's Server URL to https://YOUR-HOST/vapi/webhook and add header x-vapi-secret = your VAPI_SECRET.",
   "tools": [
     {
       "type": "function",
