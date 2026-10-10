@@ -2,10 +2,6 @@
 
 Call a phone number, talk to "Sam", and register as a patient. Data is saved to a database and exposed via a REST API.
 
-> **Live demo** (fill in before submitting)
-> - Phone number: `+1 (___) ___-____`
-> - API base URL: `https://YOUR-APP.up.railway.app` (try `/health` and `/patients`)
-
 ## Architecture
 
 ```
@@ -53,8 +49,8 @@ To let Vapi reach your laptop: `ngrok http 8000` and use the https URL it prints
 
 No API keys are in the source. The Vapi/LLM keys live only in the Vapi dashboard.
 
-## Deploy (Railway example)
-1. Push this repo to GitHub. In Railway: New Project → Deploy from GitHub repo.
+## Deploy (Railway )
+1. In Railway: New Project → Deploy from GitHub repo.
 2. Start command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 3. Add a **Volume** mounted at `/data` and set `DB_PATH=/data/patients.db` (without this the DB is wiped on redeploy).
 4. Set `VAPI_SECRET`. Generate a public domain and check `/health`.
@@ -81,15 +77,9 @@ All responses use `{ "data": ..., "error": null }` (errors: `{ "data": null, "er
 | DELETE | `/patients/{id}` | Soft delete (sets `deleted_at`) |
 | GET | `/health` | Liveness check |
 
-```bash
-curl -X POST $BASE/patients -H 'Content-Type: application/json' -d '{
- "first_name":"Jane","last_name":"Doe","date_of_birth":"03/04/1990","sex":"Female",
- "phone_number":"555-123-4567","address_line_1":"12 Oak St","city":"Springfield","state":"IL","zip_code":"62701"}'
-```
 
 ## Prompt engineering
-See `vapi/system_prompt.md` (commented). Key decisions: one question at a time; voice-friendly phrasing; spell-back for names/emails; **save is gated on an explicit "yes" to a full read-back**; phone lookup runs as soon as the number is known (duplicate detection); tool errors are phrased as instructions so the agent re-asks only the failing field.
-
+See `vapi/system_prompt.md` 
 ## Edge cases
 | Situation | Behaviour |
 |---|---|
@@ -100,18 +90,3 @@ See `vapi/system_prompt.md` (commented). Key decisions: one question at a time; 
 | Call drops mid-call | Nothing is saved (we only write after confirmation); `end-of-call-report` is logged with the end reason |
 | Existing phone number | `lookup_patient` → offer to update; DB unique index also blocks duplicates (409) |
 | Webhook spoofing | `x-vapi-secret` header checked in constant time |
-
-## Logging
-stdout: the final saved payload (`PATIENT_CREATED` / `PATIENT_UPDATED`), validation failures, and per-call `CALL_ENDED` + `TRANSCRIPT` lines from Vapi's end-of-call report.
-
-## Known limitations / trade-offs
-- **SQLite**: single-writer and file-based. Fine for a demo; use Postgres for real workloads. Needs a persistent volume.
-- Phone is unique per active patient, so family members sharing one number can't both register (a deliberate simplification enabling duplicate detection).
-- Validation is strict on names (letters, `-`, `'`), so names like "José" are rejected. Production would allow Unicode letters.
-- Speech recognition can mishear names/emails; mitigated by spell-back, not eliminated.
-- No auth on the REST API (only the webhook is secret-protected). Add API keys before exposing real data.
-- Not HIPAA compliant; use fake data only.
-- Automated tests were written but you should run `pytest` once locally to confirm in your environment.
-
-## Next steps
-Appointment scheduling after registration, call transcript stored against `patient_id`, a small dashboard page, Postgres, API auth, rate limiting.
