@@ -1,8 +1,4 @@
-"""Data layer (SQLite). Nothing here knows about HTTP or voice.
 
-SQLite was chosen for zero-setup persistence; the schema has real constraints so the
-database itself rejects bad data even if a validation layer is bypassed.
-"""
 import os
 import sqlite3
 import uuid
@@ -36,7 +32,6 @@ CREATE TABLE IF NOT EXISTS patients (
     updated_at              TEXT NOT NULL,
     deleted_at              TEXT            -- soft delete: NULL = active
 );
--- One ACTIVE patient per phone number (this is what powers duplicate detection).
 CREATE UNIQUE INDEX IF NOT EXISTS idx_patients_phone_active
     ON patients(phone_number) WHERE deleted_at IS NULL;
 CREATE INDEX IF NOT EXISTS idx_patients_last_name ON patients(last_name COLLATE NOCASE);
@@ -55,7 +50,7 @@ class DuplicatePhoneError(Exception):
 
 
 def db_path() -> str:
-    # Read at call time so tests / deploys can override via env var.
+   
     path = os.getenv("DB_PATH", "data/patients.db")
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
     return path
@@ -154,7 +149,7 @@ def list_patients(last_name=None, date_of_birth=None, phone_number=None) -> list
 
 
 def update_patient(patient_id: str, fields: dict) -> Optional[dict]:
-    # Whitelist columns (never trust key names) and never null out required columns.
+    
     fields = {k: v for k, v in fields.items()
               if k in UPDATABLE_FIELDS and not (v is None and k in NOT_NULL_FIELDS)}
     if not get_patient(patient_id):
