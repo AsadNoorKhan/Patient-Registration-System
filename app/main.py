@@ -1,4 +1,3 @@
-"""REST API. Run with: uvicorn app.main:app --reload"""
 import logging
 import uuid
 from contextlib import asynccontextmanager
