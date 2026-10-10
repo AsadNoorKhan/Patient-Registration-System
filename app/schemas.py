@@ -1,7 +1,4 @@
-"""Validation layer: the single source of truth for what a valid patient looks like.
 
-Used by BOTH the REST API and the voice-agent webhook, so the rules can't drift apart.
-"""
 import re
 from datetime import date
 from enum import Enum
@@ -28,7 +25,7 @@ class Sex(str, Enum):
     DECLINE = "Decline to Answer"
 
 
-# ---------- reusable parsing helpers (also used for query-param filters) ----------
+
 def normalize_phone(value: str) -> str:
     digits = re.sub(r"\D", "", str(value))
     if len(digits) == 11 and digits.startswith("1"):
@@ -39,7 +36,7 @@ def normalize_phone(value: str) -> str:
 
 
 def parse_dob(value) -> date:
-    """Accepts MM/DD/YYYY or YYYY-MM-DD (or a date). Rejects future / absurd dates."""
+   
     if isinstance(value, date):
         d = value
     else:
@@ -66,15 +63,14 @@ def _length(v: str, lo: int, hi: int, label: str) -> str:
 
 
 class _PatientRules(BaseModel):
-    """Field validators shared by create and update models."""
+  
 
     model_config = ConfigDict(extra="forbid")
 
     @model_validator(mode="before")
     @classmethod
     def _sanitize(cls, data):
-        # Basic input sanitization: strip control chars and angle brackets, collapse
-        # whitespace, and treat blank strings as "not provided".
+    
         if not isinstance(data, dict):
             return data
         out = {}
@@ -199,7 +195,7 @@ class PatientCreate(_PatientRules):
 
 
 class PatientUpdate(_PatientRules):
-    """Every field optional -> partial updates."""
+  
 
     first_name: Optional[str] = None
     last_name: Optional[str] = None
@@ -220,7 +216,7 @@ class PatientUpdate(_PatientRules):
 
 
 def format_errors(errors: list) -> list[dict]:
-    """Turn pydantic errors into [{field, message}] — also fed back to the voice LLM."""
+
     out = []
     for e in errors:
         field = ".".join(str(x) for x in e["loc"] if x not in ("body",))
